@@ -88,7 +88,7 @@ namespace HourBoostr
             mSessionId = Convert.ToBase64String(Encoding.UTF8.GetBytes(myUniqueId));
             mCookieContainer = new CookieContainer();
 
-            using (dynamic userAuth = WebAPI.GetInterface("ISteamUserAuth"))
+            using (var userAuth = WebAPI.GetInterface("ISteamUserAuth"))
             {
                 // generate an AES session key
                 var sessionKey = CryptoHelper.GenerateRandomBlock(32);
@@ -110,13 +110,16 @@ namespace HourBoostr
 
                 try
                 {
-                    authResult = userAuth.AuthenticateUser(
-                        steamid: client.SteamID.ConvertToUInt64(),
-                        sessionkey: HttpUtility.UrlEncode(cryptedSessionKey),
-                        encrypted_loginkey: HttpUtility.UrlEncode(cryptedLoginKey),
-                        method: "POST",
-                        secure: true
-                        );
+                    var dict = new System.Collections.Generic.Dictionary<string, object>()
+                    {
+                        { "steamid", client.SteamID.ConvertToUInt64() },
+                        { "sessionkey", cryptedSessionKey },
+                        { "encrypted_loginkey", cryptedLoginKey },
+                        { "secure", true }
+                    };
+
+                    authResult = userAuth.Call(System.Net.Http.HttpMethod.Post, "AuthenticateUser", 1, dict);
+
                 }
                 catch (Exception)
                 {
@@ -127,9 +130,9 @@ namespace HourBoostr
                 mToken = authResult["token"].AsString();
                 mTokenSecure = authResult["tokensecure"].AsString();
 
-                mCookieContainer.Add(new Cookie("sessionid", mSessionId, String.Empty, mSteamCommunityDomain));
-                mCookieContainer.Add(new Cookie("steamLogin", mToken, String.Empty, mSteamCommunityDomain));
-                mCookieContainer.Add(new Cookie("steamLoginSecure", mTokenSecure, String.Empty, mSteamCommunityDomain));
+                mCookieContainer.Add(new Cookie("sessionid", mSessionId, string.Empty, mSteamCommunityDomain));
+                mCookieContainer.Add(new Cookie("steamLogin", mToken, string.Empty, mSteamCommunityDomain));
+                mCookieContainer.Add(new Cookie("steamLoginSecure", mTokenSecure, string.Empty, mSteamCommunityDomain));
 
                 return true;
             }
