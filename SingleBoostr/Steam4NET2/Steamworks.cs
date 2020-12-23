@@ -78,6 +78,12 @@ namespace Steam4NET
                      @"HKEY_LOCAL_MACHINE\Software\Valve\Steam",
                      "InstallPath",
                      null);
+
+                if (string.IsNullOrEmpty(installPath))
+                    installPath = (string)Registry.GetValue(
+                     @"HKEY_CURRENT_USER\Software\Valve\Steam",
+                     "SteamPath",
+                     null);
             }
             catch
             {
@@ -212,6 +218,9 @@ namespace Steam4NET
 
             if (!string.IsNullOrEmpty(path))
                 Native.SetDllDirectory(path + ";" + Path.Combine(path, "bin"));
+
+            if (string.IsNullOrEmpty(path))
+                return false;
 
             path = Path.Combine(path, "steam.dll");
 

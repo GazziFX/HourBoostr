@@ -24,7 +24,7 @@ namespace SingleBoostr
         public static async Task<string> IsUpdateAvailable()
         {
             var req = new RestRequest();
-            var resp = await new RestClient(Const.VERSION_FILE_URL).ExecuteTaskAsync(req);
+            var resp = await new RestClient(Const.VERSION_FILE_URL).ExecuteAsync(req);
 
             if (resp.StatusCode != HttpStatusCode.OK)
                 return string.Empty;

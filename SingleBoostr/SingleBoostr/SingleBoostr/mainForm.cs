@@ -1394,13 +1394,14 @@ namespace SingleBoostr
                                 }
                             }*/
                             
-                            dynamic dyn = JObject.Parse(response);
-                            foreach (var card in dyn.avg_values)
+                            var dyn = JObject.Parse(response);
+                            var dict = dyn.GetValue("avg_values").ToObject<Dictionary<string, double>>();
+                            foreach (var card in dict)
                             {
-                                string s_appid = card.Name, s_price = card.Value;
+                                string s_appid = card.Key;
                                 uint appid;
-                                double price;
-                                if (uint.TryParse(s_appid, out appid) && double.TryParse(s_price, out price))
+                                double price = card.Value;
+                                if (uint.TryParse(s_appid, out appid))
                                 {
                                     var app = appList.FirstOrDefault(o => o.appid == appid);
                                     if (app != null)
